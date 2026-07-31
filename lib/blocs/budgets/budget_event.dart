@@ -39,3 +39,15 @@ class LoadItemData extends BudgetEvent {
   final String itemName;
   LoadItemData(this.itemName);
 }
+
+class RenameBudgetItems extends BudgetEvent {
+  final String oldName;
+  final String newName;
+  final String category;
+
+  RenameBudgetItems({
+    required this.category,
+    required this.newName,
+    required this.oldName,
+  });
+}

@@ -5,6 +5,8 @@
 // No UI flags, no controllers, no widgets.
 // ============================================================================
 
+import 'package:budget_book_app/blocs/budgets/models/item_details.dart';
+
 abstract class BudgetState {}
 
 /// Initial state when app just starts
@@ -46,8 +48,15 @@ class BudgetLoaded extends BudgetState {
   });
 }
 
+// class ItemDetailsLoaded extends BudgetState {
+//   final List details;
+//   final int currentMonthQty;
+
+//   ItemDetailsLoaded(this.details, this.currentMonthQty);
+// }
+
 class ItemDetailsLoaded extends BudgetState {
-  final List details;
+  final List<ItemDetailsView> details;
   final int currentMonthQty;
 
   ItemDetailsLoaded(this.details, this.currentMonthQty);

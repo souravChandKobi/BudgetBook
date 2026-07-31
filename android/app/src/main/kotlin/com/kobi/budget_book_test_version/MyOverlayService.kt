@@ -29,11 +29,14 @@ import com.airbnb.lottie.LottieDrawable
 
 import android.util.Log
 
+import android.view.WindowManager
+
 
 class MyOverlayService : ExpandableBubbleService() {
 
     override fun onCreate() {
         super.onCreate()
+
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             val channel = android.app.NotificationChannel(
@@ -116,6 +119,33 @@ class MyOverlayService : ExpandableBubbleService() {
             .triggerClickablePerimeterPx(5f)
     }
 
+    var selectedCategory = "Other"
+
+    fun selectCategory(
+    category: String,
+    catFood: Button,
+    catShopping: Button,
+    catLifestyle: Button,
+    catLoans: Button,
+    catUtilities: Button,
+    catOther: Button
+) {
+    selectedCategory = category
+
+    val buttons = listOf(catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+
+    buttons.forEach { it.isSelected = false }
+
+    when (category) {
+    "Food" -> catFood.isSelected = true
+    "Shopping" -> catShopping.isSelected = true
+    "Lifestyle" -> catLifestyle.isSelected = true
+    "Loans" -> catLoans.isSelected = true
+    "Utilities" -> catUtilities.isSelected = true
+    "Other" -> catOther.isSelected = true
+}
+}
+
     // ============================================================================================
     // 🟩 configExpandedBubble()
     // ============================================================================================
@@ -125,10 +155,83 @@ class MyOverlayService : ExpandableBubbleService() {
         val inflater = LayoutInflater.from(themedContext)
         val expandedView = inflater.inflate(R.layout.layout_view_test, null)
 
+        //to move the overlay above the keyboard
+     expandedView.viewTreeObserver.addOnGlobalLayoutListener {
+
+    val rect = android.graphics.Rect()
+    expandedView.getWindowVisibleDisplayFrame(rect)
+
+    val screenHeight = expandedView.rootView.height
+    val keyboardHeight = screenHeight - rect.bottom
+
+    if (keyboardHeight > screenHeight * 0.15) {
+        expandedView.translationY = -keyboardHeight.toFloat()
+    } else {
+        expandedView.translationY = 0f
+    }
+}
+
         val nameInput = expandedView.findViewById<AutoCompleteTextView>(R.id.nameAutoComplete)
         val quantityInput = expandedView.findViewById<EditText>(R.id.quantityEdit)
         val priceInput = expandedView.findViewById<EditText>(R.id.priceEdit)
         val addButton = expandedView.findViewById<Button>(R.id.addSaveBtn)
+
+
+        val catFood = expandedView.findViewById<Button>(R.id.catFood)
+val catShopping = expandedView.findViewById<Button>(R.id.catShopping)
+val catLifestyle = expandedView.findViewById<Button>(R.id.catLifestyle)
+val catLoans = expandedView.findViewById<Button>(R.id.catLoans)
+val catUtilities = expandedView.findViewById<Button>(R.id.catUtilities)
+val catOther = expandedView.findViewById<Button>(R.id.catOther)
+
+selectCategory("Other", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+
+catFood.setOnClickListener {
+    selectCategory("Food", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+catShopping.setOnClickListener {
+    selectCategory("Shopping", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+catLifestyle.setOnClickListener {
+    selectCategory("Lifestyle", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+catLoans.setOnClickListener {
+    selectCategory("Loans", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+catUtilities.setOnClickListener {
+    selectCategory("Utilities", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+catOther.setOnClickListener {
+    selectCategory("Other", catFood, catShopping, catLifestyle, catLoans, catUtilities, catOther)
+}
+
+// Auto select text on focus
+fun enableAutoSelect(editText: EditText) {
+
+    editText.setOnFocusChangeListener { _, hasFocus ->
+        if (hasFocus) {
+            editText.post {
+                editText.selectAll()
+            }
+        }
+    }
+
+    editText.setOnClickListener {
+        editText.post {
+            editText.selectAll()
+        }
+    }
+}
+
+enableAutoSelect(quantityInput)
+enableAutoSelect(priceInput)
+
+
 
         //add button
         addButton.setOnClickListener {
@@ -141,7 +244,7 @@ class MyOverlayService : ExpandableBubbleService() {
                 return@setOnClickListener
             }
 
-            sendItemToFlutter(name, quantity, price)
+            sendItemToFlutter(name, quantity, price, selectedCategory)
             nameInput.setText("")
             quantityInput.setText("1")
             priceInput.setText("")
@@ -168,7 +271,12 @@ class MyOverlayService : ExpandableBubbleService() {
         val y = (screenHeight * 0.07).toInt()
 
         fetchSuggestions { suggestionsList ->
-            setupAutocomplete(nameInput, suggestionsList, quantityInput, priceInput)
+            setupAutocomplete(nameInput, suggestionsList, quantityInput, priceInput,catFood,
+    catShopping,
+    catLifestyle,
+    catLoans,
+    catUtilities,
+    catOther)
         }
 
         return ExpandedBubbleBuilder(this)
@@ -208,7 +316,8 @@ class MyOverlayService : ExpandableBubbleService() {
                                 mapOf(
                                     "name" to (m["name"]?.toString() ?: ""),
                                     "quantity" to (m["quantity"]?.toString() ?: "1"),
-                                    "price" to (m["price"]?.toString() ?: "0")
+                                    "price" to (m["price"]?.toString() ?: "0"),
+                                    "category" to (m["category"]?.toString() ?: "Other")
                                 )
                             }
 
@@ -229,7 +338,13 @@ class MyOverlayService : ExpandableBubbleService() {
         nameInput: AutoCompleteTextView,
         suggestions: List<Map<String, Any>>,
         quantityInput: EditText,
-        priceInput: EditText
+        priceInput: EditText,
+        catFood: Button,
+    catShopping: Button,
+    catLifestyle: Button,
+    catLoans: Button,
+    catUtilities: Button,
+    catOther: Button
     ) {
         val names = suggestions.map { it["name"].toString() }
 
@@ -262,11 +377,29 @@ class MyOverlayService : ExpandableBubbleService() {
 
         nameInput.setOnItemClickListener { parent, _, position, _ ->
             val selectedName = parent.getItemAtPosition(position).toString()
-            val matched = suggestions.find { it["name"] == selectedName }
+            // val matched = suggestions.find { it["name"] == selectedName }
+
+            //ignore the suggestions  case
+            val matched = suggestions.find {
+    it["name"].toString().equals(selectedName, ignoreCase = true)
+}
+
 
             matched?.let {
                 quantityInput.setText(it["quantity"].toString())
                 priceInput.setText(it["price"].toString())
+
+                val category = it["category"].toString()
+
+    selectCategory(
+        category,
+        catFood,
+        catShopping,
+        catLifestyle,
+        catLoans,
+        catUtilities,
+        catOther
+    )
             }
         }
     }
@@ -275,14 +408,15 @@ class MyOverlayService : ExpandableBubbleService() {
         return START_STICKY
     }
 
-    private fun sendItemToFlutter(name: String, quantity: String, price: String) {
+    private fun sendItemToFlutter(name: String, quantity: String, price: String,category: String
+) {
         val engine = FlutterEngineCache.getInstance().get("shared_engine") ?: return
         val channel = MethodChannel(engine.dartExecutor.binaryMessenger, "overlay_channel")
 
         try {
             channel.invokeMethod(
                 "addItemFromOverlay",
-                mapOf("name" to name, "quantity" to quantity, "price" to price)
+                mapOf("name" to name, "quantity" to quantity, "price" to price, "category" to category)
             )
         } catch (_: Exception) {
         }

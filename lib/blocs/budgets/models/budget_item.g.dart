@@ -23,13 +23,14 @@ class BudgetItemAdapter extends TypeAdapter<BudgetItem> {
       price: fields[3] as int,
       dateTime: fields[4] as DateTime,
       imagePath: fields[5] as String,
+      category: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BudgetItem obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class BudgetItemAdapter extends TypeAdapter<BudgetItem> {
       ..writeByte(4)
       ..write(obj.dateTime)
       ..writeByte(5)
-      ..write(obj.imagePath);
+      ..write(obj.imagePath)
+      ..writeByte(6)
+      ..write(obj.category);
   }
 
   @override

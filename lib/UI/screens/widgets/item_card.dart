@@ -22,6 +22,7 @@ class ItemCard extends StatefulWidget {
   final DateTime date; // Purchase date
   final int quantity; // Quantity of item
   final int price; // Price per unit
+  final String category;
 
   final double containerHeight;
   final double containerWidth;
@@ -36,6 +37,7 @@ class ItemCard extends StatefulWidget {
     required this.date,
     required this.quantity,
     required this.price,
+    required this.category,
     this.onEdit,
     required this.containerHeight,
     required this.containerWidth,
@@ -59,6 +61,7 @@ class ItemCard extends StatefulWidget {
       date: item.dateTime,
       quantity: item.quantity,
       price: item.price,
+      category: item.category ?? "Other",
       containerHeight: containerHeight,
       containerWidth: containerWidth,
       isRight: isRight,
@@ -104,6 +107,23 @@ class _ItemCardState extends State<ItemCard> {
   //   "Nov",
   //   "Dec",
   // ];
+
+  IconData getIconByCategory(String category) {
+    switch (category.toLowerCase()) {
+      case "food":
+        return Icons.restaurant;
+      case "shopping":
+        return Icons.shopping_bag_rounded;
+      case "loans":
+        return Icons.account_balance_wallet;
+      case "lifestyle":
+        return Icons.sports_gymnastics_rounded;
+      case "utilities":
+        return Icons.receipt_long;
+      default:
+        return Icons.shopping_cart;
+    }
+  }
 
   /// ========================================================================
   /// 🖥 BUILD METHOD — Constructs the card UI
@@ -154,7 +174,7 @@ class _ItemCardState extends State<ItemCard> {
                 SizedBox(
                   width: widget.containerWidth * 0.1,
                   child: Icon(
-                    Icons.shopping_cart,
+                    getIconByCategory(widget.category),
                     color: myThemeVar.iconTheme.color,
                   ),
                 ),
@@ -208,6 +228,9 @@ class _ItemCardState extends State<ItemCard> {
                     ],
                   ),
                 ),
+
+                //temp item type
+                // Flexible(child: Text("Type: ${widget.category}")),
 
                 // ==================================================================
                 // 📦 QUANTITY DISPLAY

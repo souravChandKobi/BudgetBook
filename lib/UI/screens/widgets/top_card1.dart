@@ -501,43 +501,55 @@ class _TopCard1State extends State<TopCard1> {
                                               widget.onEditBudget(); // ✅ THIS
                                             },
 
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: "of:",
-                                                    style: TextStyle(
-                                                      color: myThemeVar
-                                                          .colorScheme
-                                                          .primary,
-                                                      fontSize: 12,
-                                                      fontFamily:
-                                                          GoogleFonts.workSans()
-                                                              .fontFamily,
-                                                    ),
-                                                    // style: myThemeVar.textTheme.bodySmall,
+                                            child: Row(
+                                              children: [
+                                                RichText(
+                                                  text: TextSpan(
+                                                    children: [
+                                                      TextSpan(
+                                                        text: "of:",
+                                                        style: TextStyle(
+                                                          color: myThemeVar
+                                                              .colorScheme
+                                                              .primary,
+                                                          fontSize: 12,
+                                                          fontFamily:
+                                                              GoogleFonts.workSans()
+                                                                  .fontFamily,
+                                                        ),
+                                                        // style: myThemeVar.textTheme.bodySmall,
+                                                      ),
+                                                      TextSpan(
+                                                        text: "₹$budget",
+                                                        style: TextStyle(
+                                                          color:
+                                                              const Color.fromARGB(
+                                                                133,
+                                                                26,
+                                                                141,
+                                                                30,
+                                                              ),
+                                                          // Colors.blue,
+                                                          fontSize: 12,
+                                                          fontFamily:
+                                                              GoogleFonts.workSans()
+                                                                  .fontFamily,
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                        ),
+                                                        // style: myThemeVar.textTheme.bodySmall,
+                                                      ),
+                                                    ],
                                                   ),
-                                                  TextSpan(
-                                                    text: "₹$budget",
-                                                    style: TextStyle(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                            133,
-                                                            56,
-                                                            134,
-                                                            58,
-                                                          ),
-                                                      fontSize: 12,
-                                                      fontFamily:
-                                                          GoogleFonts.workSans()
-                                                              .fontFamily,
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                    ),
-                                                    // style: myThemeVar.textTheme.bodySmall,
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+
+                                                Icon(
+                                                  Icons
+                                                      .arrow_forward_ios_rounded,
+                                                  size: 9,
+                                                  color: Colors.blue,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                           SizedBox(height: 5),
@@ -607,7 +619,7 @@ class _TopCard1State extends State<TopCard1> {
               ),
             ),
 
-            //drop down menu to select the time of expense
+            //dropdown menu to select the time of expense
             Container(
               alignment: Alignment.centerRight,
               // color: const Color.fromARGB(255, 155, 39, 176),
@@ -620,15 +632,20 @@ class _TopCard1State extends State<TopCard1> {
                 selectedItemBuilder: (context) {
                   return grandTotalDurationItems.map((item) {
                     return SizedBox(
-                      width: 100, // 👈 MUST match button width
-                      child: Center(
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                      width: 100, //  MUST match button width
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+                          // const SizedBox(width: 1),
+                          const Icon(Icons.arrow_drop_down, size: 20),
+                        ],
                       ),
                     );
                   }).toList();

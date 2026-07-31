@@ -1,10 +1,12 @@
 import 'dart:developer';
 
 import 'package:budget_book_app/UI/helper/api.dart';
+import 'package:budget_book_app/UI/screens/widgets/add_item_dialog_box.dart';
 import 'package:budget_book_app/UI/screens/widgets/item_card.dart';
 import 'package:budget_book_app/UI/screens/widgets/month_card.dart';
 import 'package:budget_book_app/blocs/budgets/models/budget_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 
@@ -15,11 +17,14 @@ class Itemdatascreen extends StatefulWidget {
 
   final String itemName;
 
+  final String itemType;
+
   const Itemdatascreen({
     super.key,
     required this.containerHeight,
     required this.containerWidth,
     required this.itemName,
+    required this.itemType,
   });
 
   @override
@@ -197,6 +202,21 @@ class _ItemdatascreenState extends State<Itemdatascreen> {
             fontSize: myThemeVar.textTheme.bodyLarge!.fontSize,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AddItemDialogBox(
+                  existingName: widget.itemName,
+                  isRenamingItem: true,
+                  existingType: widget.itemType,
+                ),
+              );
+            },
+            icon: Icon(Icons.edit),
+          ),
+        ],
       ),
 
       body: Column(
@@ -349,111 +369,156 @@ class _ItemdatascreenState extends State<Itemdatascreen> {
                               1;
                           final itm = entry;
 
-                          return Card(
-                            color: myThemeVar.cardColor,
-                            margin: EdgeInsets.only(
-                              bottom: 2.5,
-                              top: 2.5,
-                              left: 3,
-                              right: 3,
+                          return Slidable(
+                            key: ValueKey(itm.id),
+
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              extentRatio: 0.25,
+                              children: [
+                                SlidableAction(
+                                  onPressed: (_) async {
+                                    final BudgetItem? uitem = await showDialog(
+                                      context: context,
+                                      builder: (_) => AddItemDialogBox(
+                                        existingItem: itm,
+                                        existingName: itm.name,
+                                        existingPrice: itm.price.toString(),
+                                        existingQuantity: itm.quantity
+                                            .toString(),
+
+                                        isEditing: true,
+                                        existingType: itm.category,
+                                      ),
+                                    );
+                                    if (uitem != null) {
+                                      // UpdateBudgetItem(item);
+                                      // blocContext.read<BudgetBloc>().add(
+                                      //   UpdateBudgetItem(uitem),
+                                      // );
+
+                                      itemsBox.put(uitem.id, uitem);
+                                      setState(() {});
+                                    }
+                                  },
+
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor:
+                                      myThemeVar.colorScheme.primary,
+                                  icon: Icons.edit,
+                                  label: 'Edit',
+                                ),
+                              ],
                             ),
-                            // margin: const EdgeInsets.symmetric(
-                            //   horizontal: 4,
-                            //   vertical: 2,
-                            // ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              side: BorderSide(
-                                color: Theme.of(context).dividerColor,
-                                width: 1,
+
+                            child: Card(
+                              color: myThemeVar.cardColor,
+                              margin: EdgeInsets.only(
+                                bottom: 2.5,
+                                top: 2.5,
+                                left: 3,
+                                right: 3,
                               ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // SERIAL NO
-                                  SizedBox(
-                                    width: widget.containerWidth * 0.1,
-                                    child: Text(
-                                      "$serialNo.",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        // fontWeight: FontWeight.bold,
-                                        fontFamily:
-                                            GoogleFonts.manrope().fontFamily,
+                              // margin: const EdgeInsets.symmetric(
+                              //   horizontal: 4,
+                              //   vertical: 2,
+                              // ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                side: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    // SERIAL NO
+                                    SizedBox(
+                                      width: widget.containerWidth * 0.1,
+                                      child: Text(
+                                        "$serialNo.",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          // fontWeight: FontWeight.bold,
+                                          fontFamily:
+                                              GoogleFonts.manrope().fontFamily,
+                                        ),
                                       ),
                                     ),
-                                  ),
 
-                                  // ITEM NAME + DATE
-                                  SizedBox(
-                                    width: widget.containerWidth * 0.4,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Api.oneLineScroll(
-                                          itm.name,
-                                          TextStyle(
+                                    // ITEM NAME + DATE
+                                    SizedBox(
+                                      width: widget.containerWidth * 0.4,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Api.oneLineScroll(
+                                            itm.name,
+                                            TextStyle(
+                                              color: myThemeVar
+                                                  .colorScheme
+                                                  .primary,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: GoogleFonts.manrope()
+                                                  .fontFamily,
+                                            ),
+                                          ),
+                                          Api.oneLineScroll(
+                                            formatDateTime(itm.dateTime),
+                                            TextStyle(
+                                              fontSize: 11,
+                                              color: myThemeVar
+                                                  .colorScheme
+                                                  .secondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // QTY
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: widget.containerWidth * 0.14,
+                                        child: Text(
+                                          "qty:${itm.quantity}",
+                                          style: TextStyle(
                                             color:
                                                 myThemeVar.colorScheme.primary,
-                                            fontSize: 14,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w700,
                                             fontFamily: GoogleFonts.manrope()
                                                 .fontFamily,
                                           ),
                                         ),
-                                        Api.oneLineScroll(
-                                          formatDateTime(itm.dateTime),
-                                          TextStyle(
+                                      ),
+                                    ),
+
+                                    // PRICE
+                                    Flexible(
+                                      child: SizedBox(
+                                        width: widget.containerWidth * 0.15,
+                                        child: Text(
+                                          "₹${itm.price * itm.quantity}",
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                            // color: myThemeVar.colorScheme.primary,
                                             fontSize: 11,
-                                            color: myThemeVar
-                                                .colorScheme
-                                                .secondary,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: GoogleFonts.manrope()
+                                                .fontFamily,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // QTY
-                                  Flexible(
-                                    child: SizedBox(
-                                      width: widget.containerWidth * 0.14,
-                                      child: Text(
-                                        "qty:${itm.quantity}",
-                                        style: TextStyle(
-                                          color: myThemeVar.colorScheme.primary,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily:
-                                              GoogleFonts.manrope().fontFamily,
-                                        ),
                                       ),
                                     ),
-                                  ),
-
-                                  // PRICE
-                                  Flexible(
-                                    child: SizedBox(
-                                      width: widget.containerWidth * 0.15,
-                                      child: Text(
-                                        "₹${itm.price * itm.quantity}",
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          // color: myThemeVar.colorScheme.primary,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily:
-                                              GoogleFonts.manrope().fontFamily,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           );

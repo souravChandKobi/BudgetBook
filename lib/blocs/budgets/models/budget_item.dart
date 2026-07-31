@@ -2,6 +2,11 @@ import 'package:hive/hive.dart';
 
 part 'budget_item.g.dart';
 
+// @HiveType(typeId: 2)
+// enum TransactionType{
+//   @HiveField(0)
+//   income,
+// }
 
 @HiveType(typeId: 1)
 class BudgetItem extends HiveObject {
@@ -23,6 +28,10 @@ class BudgetItem extends HiveObject {
   @HiveField(5)
   String imagePath;
 
+  @HiveField(6)
+String? category;
+
+String get safeCategory => category ?? "Other";
 
   BudgetItem({
     required this.id,
@@ -31,6 +40,7 @@ class BudgetItem extends HiveObject {
     required this.price,
     required this.dateTime,
     required this.imagePath,
+    this.category
   });
 
   // --------------------------------------------------------
@@ -44,6 +54,7 @@ class BudgetItem extends HiveObject {
       'price': price,
       'dateTime': dateTime.toIso8601String(),
       'imagePath': imagePath,
+      'category': category,
     };
   }
 
@@ -58,6 +69,7 @@ class BudgetItem extends HiveObject {
       price: map['price'],
       dateTime: DateTime.parse(map['dateTime']),
       imagePath: map['imagePath'],
+      category: map['category'],
     );
   }
 }

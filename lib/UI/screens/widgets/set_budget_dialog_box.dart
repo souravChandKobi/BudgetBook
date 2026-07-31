@@ -1,5 +1,6 @@
 import 'package:budget_book_app/blocs/budgets/models/budget_input.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SetBudgetDialogBox extends StatefulWidget {
   final int currentMonthlyBudget;
@@ -53,8 +54,13 @@ class _SetBudgetDialogBoxState extends State<SetBudgetDialogBox> {
       title: Column(
         children: [
           Text(
-            'Monthly Budget',
-            style: TextStyle(color: myThemeVar.colorScheme.primary),
+            'Monthly Budgets',
+            style: TextStyle(
+              color: myThemeVar.colorScheme.primary,
+              // fontSize: 14,
+              fontWeight: FontWeight.w700,
+              fontFamily: GoogleFonts.manrope().fontFamily,
+            ),
             textAlign: TextAlign.center,
           ),
           // Text(

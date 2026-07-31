@@ -70,6 +70,7 @@ Future<void> overlayEntryPoint() async {
         price: int.parse(data["price"]),
         dateTime: DateTime.now(),
         imagePath: "",
+        category: data["category"] ?? "Other",
       );
 
       // Old: box.add(item);  → creates duplicate
@@ -80,16 +81,31 @@ Future<void> overlayEntryPoint() async {
       return {"savedId": item.id};
     }
 
+    // if (call.method == "getSuggestions") {
+    //   return box.values
+    //       .map(
+    //         (item) => {
+    //           "name": item.name,
+    //           "quantity": item.quantity,
+    //           "price": item.price,
+    //         },
+    //       )
+    //       .toList();
+    // }
+
     if (call.method == "getSuggestions") {
-      return box.values
-          .map(
-            (item) => {
-              "name": item.name,
-              "quantity": item.quantity,
-              "price": item.price,
-            },
-          )
-          .toList();
+      final latestByName = <String, Map<String, dynamic>>{};
+
+      for (final item in box.values) {
+        latestByName[item.name.toLowerCase()] = {
+          "name": item.name,
+          "quantity": item.quantity,
+          "price": item.price,
+          "category": item.category,
+        };
+      }
+
+      return latestByName.values.toList();
     }
 
     return null;
@@ -139,7 +155,7 @@ Future<void> main() async {
   );
 
   // ------------------ Theme ------------------
-  final savedTheme = Hive.box('appSettings').get('themeMode', defaultValue: 0);
+  final savedTheme = Hive.box('appSettings').get('themeMode', defaultValue: 1);
   themeNotifier.value = ThemeMode.values[savedTheme];
 
   runApp(
@@ -147,7 +163,7 @@ Future<void> main() async {
       create: (_) {
         final box = Hive.box<BudgetItem>('itemsBox');
         final settingsBox = Hive.box("appSettings");
-        final repository = BudgetRepository(box,settingsBox);
+        final repository = BudgetRepository(box, settingsBox);
         final bloc = BudgetBloc(repository);
         bloc.add(LoadBudget());
 

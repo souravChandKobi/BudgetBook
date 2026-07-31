@@ -3,6 +3,7 @@ import 'dart:math' hide log;
 
 import 'package:animations/animations.dart';
 import 'package:budget_book_app/UI/helper/api.dart';
+import 'package:budget_book_app/UI/helper/customSearchDelegate.dart';
 import 'package:budget_book_app/UI/screens/itemDataScreen.dart';
 import 'package:budget_book_app/UI/screens/permissions_screen.dart';
 import 'package:budget_book_app/UI/screens/theme_select_screeen.dart';
@@ -57,6 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // final user = FirebaseAuth.instance.currentUser;
 
     final blocContext = context;
+
+    // final searchItems = context.read<BudgetBloc>().state;
     //FORMMATTED MONTH AND YEAR FOR THE LISTVIEWBUILDER
     String formatMonth(String key) {
       final year = int.parse(key.split('-')[0]);
@@ -85,54 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
     int duration = 300;
     int colorDuration = duration + (duration * .2).toInt();
 
-    // ---------------------------------------------------------
-    // Convert Hive box to list & sort newest → oldest
-    // ---------------------------------------------------------
-    // final items = dummyItems..sort((a, b) => b.dateTime.compareTo(a.dateTime));
-
-    // final grouped = groupItemsByMonth(items);
-
-    // final List<dynamic> displayList = [];
-
-    // final Map<String, int> monthlyTotal = {};
-
-    // grouped.forEach((monthKey, monthItem) {
-    //   int total = monthItem.fold(
-    //     0,
-    //     (sum, item) => sum + (item.price * item.quantity),
-    //   );
-    //   monthlyTotal[monthKey] = total;
-
-    //   displayList.add(monthKey);
-    //   displayList.addAll(monthItem);
-    // });
-
-    /////////////////////////////////////////////////////
-
     return Stack(
       children: [
         // bottom layer
         Material(
           color: Colors.transparent,
           child: Container(
-            // decoration: BoxDecoration(
-            //   gradient: LinearGradient(
-            //     colors: [
-            //       myThemeVar.colorScheme.surface,
-            //       myThemeVar.brightness == Brightness.dark
-            //           ? MyAppTheme.scaffoldBackgroundColorSecondaryDark
-            //           : MyAppTheme.scaffoldBackgroundColorSecondaryLight,
-            //     ],
-            //     begin: Alignment.topLeft,
-            //     end: Alignment.bottomLeft,
-            //   ),
-            // ),
-            // color: myThemeVar.colorScheme.surface,
             decoration: BoxDecoration(
-              // image: DecorationImage(
-              //   image: AssetImage("assets/bg/scaf_paper_bg.jpg"),
-              //   fit: BoxFit.cover,
-              // ),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -171,39 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           IconButton(
                             color: myThemeVar.iconTheme.color,
-                            icon: const Icon(Icons.clear),
+                            icon: const Icon(
+                              Icons.clear,
+                              color: Colors.transparent,
+                            ),
                             onPressed: () {
                               setState(() {
-                                // if (backgroudColorofCards ==
-                                //     myThemeVar.scaffoldBackgroundColor) {
-                                //   backgroudColorofCards =
-                                //       myThemeVar.colorScheme.surface;
-                                // } else {
-                                //   backgroudColorofCards =
-                                //       myThemeVar.scaffoldBackgroundColor;
-                                // }
-                                // if (isRight) {
-                                //   mainContainerHeight = MediaQuery.of(
-                                //     context,
-                                //   ).size.height;
-                                //   mainContainerWidth = MediaQuery.of(
-                                //     context,
-                                //   ).size.width;
-                                // } else {
-                                //   mainContainerHeight =
-                                //       MediaQuery.of(context).size.height * 0.7;
-                                //   mainContainerWidth =
-                                //       MediaQuery.of(context).size.width * 0.7;
-                                // }
 
                                 isRight = !isRight;
-                                // isOpen = !isOpen;
-
-                                // if (isRight) {
-                                //   isRight = false;
-                                // } else {
-                                //   isRight = true;
-                                // }
+                                
                               });
                             },
                           ),
@@ -230,27 +168,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 final user = snapshot.data;
                                 return Container(
-                                  // width: double.infinity,
                                   width:
                                       MediaQuery.of(context).size.width * 0.55,
-                                  // height: MediaQuery.of(context).size.height * .1,
-
-                                  // height: double.infinity,
-                                  // color: Colors.red,
                                   margin: EdgeInsets.only(left: 0, right: 0),
 
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(7),
                                     onTap: () {
-                                      // Navigator.pop(context);
-
-                                      // Navigator.pop(context);
-                                      user == null
-                                          ? {
-                                              // handleLoginButtonClick(),
-                                              isRight = !isRight,
-                                            }
-                                          : log("already logged");
+                                      setState(() {
+                                        isRight = !isRight;
+                                      });
+                                      try {
+                                        context.read<BudgetBloc>().add(
+                                          SignInToGoogleRequested(),
+                                        );
+                                      } catch (e) {
+                                        log(
+                                          "From homeScreen.dart- Log in button: Error: $e",
+                                        );
+                                      }
 
                                       log("user name clicked");
                                     },
@@ -288,7 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                               children: [
                                                 FittedBox(
                                                   child: Text(
-                                                    user?.displayName ?? "",
+                                                    user?.displayName ??
+                                                        "Manage your Google Account",
                                                     style: TextStyle(
                                                       fontSize: 18,
                                                       fontWeight:
@@ -299,16 +236,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                   ),
                                                 ),
-                                                FittedBox(
-                                                  child: Text(
-                                                    user?.email ?? "",
-                                                    style: TextStyle(
-                                                      color: myThemeVar
-                                                          .colorScheme
-                                                          .secondary,
+                                                if (user?.email != null)
+                                                  FittedBox(
+                                                    child: Text(
+                                                      user!.email!,
+                                                      style: TextStyle(
+                                                        color: myThemeVar
+                                                            .colorScheme
+                                                            .secondary,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
                                               ],
                                             ),
                                           ),
@@ -390,57 +328,84 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          //3rd button
-
-                          // Material(
-                          //   color: Colors.transparent,
-                          //   child: InkWell(
-                          //     borderRadius: BorderRadius.circular(7),
-                          //     onTap: () {
-                          //       setState(() {
-                          //         isRight = !isRight;
-                          //       });
-                          //       Navigator.push(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //           builder: (_) => Activities(),
-                          //         ),
-                          //       );
-                          //     },
-                          //     child: Container(
-                          //       alignment: Alignment.centerLeft,
-                          //       padding: EdgeInsets.only(left: 5, right: 2),
-                          //       // height:
-                          //       //     MediaQuery.of(context).size.height *
-                          //       //     .1,
-                          //       width: MediaQuery.of(context).size.width * .5,
-                          //       // color: Colors.blue,
-                          //       child: FittedBox(
-                          //         child: Row(
-                          //           children: [
-                          //             Icon(
-                          //               Icons.format_list_bulleted_outlined,
-                          //               color: myThemeVar.colorScheme.primary,
-                          //               size: myThemeVar
-                          //                   .textTheme
-                          //                   .bodyLarge!
-                          //                   .fontSize!
-                          //                   .toDouble(),
-                          //             ),
-                          //             SizedBox(width: 10),
-                          //             Text(
-                          //               "Button 3",
-                          //               style: myThemeVar.textTheme.bodyLarge,
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
                           SizedBox(height: 10),
 
                           //2nd button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(7),
+                              onTap: () {
+                                setState(() {
+                                  isRight = !isRight;
+                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TopExpensesScreen(
+                                      containerHeight: MediaQuery.of(
+                                        context,
+                                      ).size.height,
+                                      containerWidth: MediaQuery.of(
+                                        context,
+                                      ).size.width,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.only(left: 5, right: 2),
+                                height:
+                                    MediaQuery.of(context).size.height * .05,
+                                width: MediaQuery.of(context).size.width * .5,
+                                // color: Colors.blue,
+                                // color: Colors.red,
+                                child: FittedBox(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      FittedBox(
+                                        child: Icon(
+                                          Icons.calculate_outlined,
+                                          color: myThemeVar.colorScheme.primary,
+                                          size:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.05,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      FittedBox(
+                                        child: SingleChildScrollView(
+                                          child: Text(
+                                            "Top Expenses",
+                                            maxLines: 1,
+                                            // style: myThemeVar.textTheme.bodyLarge,
+                                            style: TextStyle(
+                                              fontFamily: GoogleFonts.manrope()
+                                                  .fontFamily,
+                                              fontSize:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.05,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 10),
+
+                          //3rd button
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -490,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       FittedBox(
                                         child: SingleChildScrollView(
                                           child: Text(
-                                            "Top Expenses",
+                                            "Statistics",
                                             maxLines: 1,
                                             // style: myThemeVar.textTheme.bodyLarge,
                                             style: TextStyle(
@@ -516,6 +481,81 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(height: 10),
 
                           //3rd button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(7),
+                              onTap: () {
+                                setState(() {
+                                  isRight = !isRight;
+                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TopExpensesScreen(
+                                      containerHeight: MediaQuery.of(
+                                        context,
+                                      ).size.height,
+                                      containerWidth: MediaQuery.of(
+                                        context,
+                                      ).size.width,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.only(left: 5, right: 2),
+                                height:
+                                    MediaQuery.of(context).size.height * .05,
+                                width: MediaQuery.of(context).size.width * .5,
+                                // color: Colors.blue,
+                                // color: Colors.red,
+                                child: FittedBox(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      FittedBox(
+                                        child: Icon(
+                                          Icons.calendar_month,
+                                          color: myThemeVar.colorScheme.primary,
+                                          size:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.05,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      FittedBox(
+                                        child: SingleChildScrollView(
+                                          child: Text(
+                                            "Calender",
+                                            maxLines: 1,
+                                            // style: myThemeVar.textTheme.bodyLarge,
+                                            style: TextStyle(
+                                              fontFamily: GoogleFonts.manrope()
+                                                  .fontFamily,
+                                              fontSize:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.05,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 10),
+
+                          //4th button
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -584,9 +624,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           SizedBox(height: 10),
 
-                          //3rd Button
-
-                          //4th Button
+                          //5th Button
                           FirebaseAuth.instance.currentUser != null
                               ? Material(
                                   color: Colors.transparent,
@@ -981,6 +1019,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       : null,
                   child: Scaffold(
+                    resizeToAvoidBottomInset: false,
                     appBar: AppBar(
                       toolbarHeight: kToolbarHeight - 15,
                       systemOverlayStyle: const SystemUiOverlayStyle(
@@ -999,15 +1038,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         //   ),
                         // ),
                       ),
-                      leading: IconButton(
-                        color: myThemeVar.iconTheme.color,
-                        icon: const Icon(Icons.menu),
-                        onPressed: () {
-                          setState(() {
-                            isRight = !isRight;
-                          });
-                        },
-                      ),
+                      leading: !isRight
+                          ? IconButton(
+                              color: myThemeVar.iconTheme.color,
+                              icon: const Icon(Icons.menu),
+                              onPressed: () {
+                                setState(() {
+                                  isRight = !isRight;
+                                });
+                              },
+                            )
+                          : IconButton(
+                              color: myThemeVar.iconTheme.color,
+                              icon: const Icon(Icons.close_outlined),
+                              onPressed: () {
+                                setState(() {
+                                  isRight = !isRight;
+                                });
+                              },
+                            ),
                       // iconTheme: const IconThemeData(color: Colors.white70),
                       title: Text(
                         "Budget Book",
@@ -1019,34 +1068,54 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       actions: [
-                        StreamBuilder(
-                          stream: FirebaseAuth.instance.authStateChanges(),
-                          builder: (context, snapshot) {
-                            final user = snapshot.data;
-                            return GestureDetector(
-                              onTap: () {
-                                log("photo url: ${user?.photoURL}");
-                                AccountSettingsDialog()
-                                    .showAccountSettingDialog(context);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 12),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.transparent,
-                                  backgroundImage: user?.photoURL != null
-                                      ? NetworkImage(user!.photoURL!)
-                                      : null,
-                                  child: user?.photoURL == null
-                                      ? Icon(
-                                          Icons.person,
-                                          color: myThemeVar.iconTheme.color,
-                                        )
-                                      : null,
+                        //Search Icon
+                        IconButton(
+                          onPressed: () {
+                            final state = context.read<BudgetBloc>().state;
+
+                            if (state is BudgetLoaded) {
+                              showSearch(
+                                context: context,
+                                delegate: Customsearchdelegate(
+                                  displayList: state.displayList,
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
+                          icon: Icon(Icons.search_rounded),
                         ),
+                        SizedBox(width: 10),
+
+                        //Menu
+
+                        // StreamBuilder(
+                        //   stream: FirebaseAuth.instance.authStateChanges(),
+                        //   builder: (context, snapshot) {
+                        //     final user = snapshot.data;
+                        //     return GestureDetector(
+                        //       onTap: () {
+                        //         log("photo url: ${user?.photoURL}");
+                        //         AccountSettingsDialog()
+                        //             .showAccountSettingDialog(context);
+                        //       },
+                        //       child: Padding(
+                        //         padding: const EdgeInsets.only(right: 12),
+                        //         child: CircleAvatar(
+                        //           backgroundColor: Colors.transparent,
+                        //           backgroundImage: user?.photoURL != null
+                        //               ? NetworkImage(user!.photoURL!)
+                        //               : null,
+                        //           child: user?.photoURL == null
+                        //               ? Icon(
+                        //                   Icons.person,
+                        //                   color: myThemeVar.iconTheme.color,
+                        //                 )
+                        //               : null,
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                       ],
                     ),
 
@@ -1180,7 +1249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     containeWidth: 250,
 
                                                     onEditBudget: () async {
-                                                      BudgetInput
+                                                      BudgetInput?
                                                       bnudget = await showDialog(
                                                         context: context,
                                                         builder: (_) =>
@@ -1316,20 +1385,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         final BudgetItem?
                                                         uitem = await showDialog(
                                                           context: blocContext,
-                                                          builder: (_) =>
-                                                              AddItemDialogBox(
-                                                                existingItem:
-                                                                    item,
-                                                                existingName:
-                                                                    item.name,
-                                                                existingPrice: item
-                                                                    .price
+                                                          builder: (_) => AddItemDialogBox(
+                                                            existingItem: item,
+                                                            existingName:
+                                                                item.name,
+                                                            existingPrice: item
+                                                                .price
+                                                                .toString(),
+                                                            existingQuantity:
+                                                                item.quantity
                                                                     .toString(),
-                                                                existingQuantity: item
-                                                                    .quantity
-                                                                    .toString(),
-                                                                isEditing: true,
-                                                              ),
+                                                            isEditing: true,
+                                                            existingType:
+                                                                item.category ??
+                                                                "Other",
+                                                          ),
                                                         );
                                                         if (uitem != null) {
                                                           // UpdateBudgetItem(item);
@@ -1468,6 +1538,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             quantity:
                                                                 item.quantity,
                                                             price: item.price,
+                                                            category:
+                                                                item.category ??
+                                                                "Other",
                                                             onEdit: () {},
                                                             containerHeight:
                                                                 MediaQuery.of(
@@ -1493,6 +1566,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 ).size.width,
                                                             itemName:
                                                                 item.name ?? "",
+                                                            itemType:
+                                                                item.category ??
+                                                                "Other",
                                                           );
                                                         },
                                                   ),
@@ -1571,16 +1647,24 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () async {
                             log('Pressed Add Item');
                             // AddItemDialogBox();
-                            final BudgetItem? item = await showDialog(
+                            //final BudgetItem? item = await
+                            showDialog(
                               context: context,
-                              builder: (_) =>
-                                  AddItemDialogBox(isEditing: false),
+                              builder: (_) => AddItemDialogBox(
+                                isEditing: false,
+                                onItemAdded: (item) {
+                                  context.read<BudgetBloc>().add(
+                                    AddBudgetItem(item),
+                                  );
+                                },
+                                existingType: 'Other',
+                              ),
                             );
-                            if (item != null) {
-                              blocContext.read<BudgetBloc>().add(
-                                AddBudgetItem(item),
-                              );
-                            }
+                            // if (item != null) {
+                            //   blocContext.read<BudgetBloc>().add(
+                            //     AddBudgetItem(item),
+                            //   );
+                            // }
                           },
                           label: 'Add Item',
                           labelStyle: myThemeVar.textTheme.bodySmall,

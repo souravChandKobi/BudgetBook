@@ -63,6 +63,7 @@ class _TopExpensesScreenState extends State<TopExpensesScreen> {
 
     final Map<String, int> totalSpentByItem = {};
     final Map<String, int> totalQtyByItem = {};
+    final Map<String, String> categoryByItem = {};
 
     for (final item in items) {
       if (item.dateTime.month == currMont) {
@@ -71,6 +72,9 @@ class _TopExpensesScreenState extends State<TopExpensesScreen> {
 
         totalQtyByItem[item.name] =
             (totalQtyByItem[item.name] ?? 0) + (item.quantity);
+
+        // ⭐ store category
+        categoryByItem[item.name] = item.category ?? "Other";
       }
     }
 
@@ -223,6 +227,7 @@ class _TopExpensesScreenState extends State<TopExpensesScreen> {
                     final totalPrice = entry.value;
 
                     final totalQty = totalQtyByItem[itemName];
+                    final itemCategory = categoryByItem[itemName] ?? "Other";
                     //////////////////////////////////////////
                     return OpenContainer(
                       closedElevation: 0,
@@ -427,6 +432,7 @@ class _TopExpensesScreenState extends State<TopExpensesScreen> {
                           containerHeight: MediaQuery.of(context).size.height,
                           containerWidth: MediaQuery.of(context).size.width,
                           itemName: itemName,
+                          itemType: itemCategory,
                         );
                       },
                     );

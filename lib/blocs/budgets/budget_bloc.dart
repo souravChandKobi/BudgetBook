@@ -200,6 +200,22 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       log("from budget_bloc.dart: 👋 User signed out safely");
     });
 
+    on<RenameBudgetItems>((event, emit) async {
+      final items = repository.getAllItems();
+
+      for (final item in items) {
+        if (item.name.toLowerCase() == event.oldName.toLowerCase()) {
+          item.name = event.newName;
+          item.category = event.category;
+          await repository.updateItem(item);
+        }
+      }
+
+      add(LocalItemsChanged());
+      // // ⭐ refresh item details screen
+      // add(LoadItemData(event.newName));
+    });
+
     // --------------------------------------------------
     // 2️⃣ NOW it is safe to add events
     // --------------------------------------------------
