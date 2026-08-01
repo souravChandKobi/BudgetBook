@@ -10,7 +10,7 @@ This app pops up an overlay bubble after a transaction, and all you have to do i
 
 
 <p align="center">
-  <img src="/assets/homescreen.jpg" width="30%" />
+  <img src="/assets/demo gif.gif" width="30%" />
   <img src="/assets/entry.jpg" width="30%" />
   <img src="/assets/topexpenses.jpg" width="30%" />
 </p>
