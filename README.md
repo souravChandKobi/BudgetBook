@@ -1,5 +1,11 @@
 # Budget Book 
 
+<p align="center">
+  <img src="/assets/demo gif.gif" width="30%" />
+  <img src="/assets/entry.jpg" width="30%" />
+  <img src="/assets/topexpenses.jpg" width="30%" />
+</p>
+
 So, Story Time, I spent around ₹9000 in a week, and I had no idea where it went. So I decided "I'm going to track my budget from now on", BUT turns out it's a hassle using the 'Notes App', and other budget management apps are not "automatic" enough.
 So here comes the idea:
 
