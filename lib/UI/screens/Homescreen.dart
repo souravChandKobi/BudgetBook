@@ -1059,7 +1059,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                       // iconTheme: const IconThemeData(color: Colors.white70),
                       title: Text(
-                        "Budget Book",
+                        "Budget Test",
                         style: TextStyle(
                           color: myThemeVar.colorScheme.primary,
                           fontFamily: GoogleFonts.workSans().fontFamily,
