@@ -80,9 +80,6 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       name: "BudgetBloc",
     );
 
-    // 🔥 READ BUDGET FROM STORAGE
-    // int monthlyBudget = repository.monthlyBudget;
-    // log("from budget_bloc.dart: monthlyBudget: $monthlyBudget");
 
     emit(
       BudgetLoaded(
@@ -179,26 +176,6 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       emit(ItemDetailsLoaded(result, currentMonthQty));
     });
 
-    // on<SignInToGoogleRequested>((event, emit) async {
-    //   final userCred = await repository.signInWithGoogle();
-    //   if (userCred == null) return;
-
-    //   await repository.currentUserData();
-    //   await repository.initialSync();
-    //   await repository.syncLocalItemsToCloud();
-
-    //   await repository.startSync();
-    // });
-
-    // on<SignOutRequested>((event, emit) async {
-    //   await repository.stopSync();
-
-    //   await FirebaseAuth.instance.signOut();
-    //   await GoogleSignIn.instance.signOut();
-    //   await GoogleSignIn.instance.disconnect();
-
-    //   log("from budget_bloc.dart: 👋 User signed out safely");
-    // });
 
     on<RenameBudgetItems>((event, emit) async {
       final items = repository.getAllItems();
@@ -212,17 +189,17 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       }
 
       add(LocalItemsChanged());
-      // // ⭐ refresh item details screen
+      // // refresh item details screen
       // add(LoadItemData(event.newName));
     });
 
     // --------------------------------------------------
-    // 2️⃣ NOW it is safe to add events
+    // 2 NOW it is safe to add events
     // --------------------------------------------------
     add(LoadBudget());
 
     // --------------------------------------------------
-    // 3️⃣ NOW start Hive listener
+    // 3 NOW start Hive listener
     // --------------------------------------------------
     _hiveSub = repository.box.watch().listen((_) {
       add(LocalItemsChanged());

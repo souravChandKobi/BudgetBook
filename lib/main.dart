@@ -9,6 +9,7 @@ import 'package:budget_book_app/blocs/budgets/budget_bloc.dart';
 import 'package:budget_book_app/blocs/budgets/budget_event.dart';
 import 'package:budget_book_app/blocs/budgets/models/budget_item.dart';
 import 'package:budget_book_app/blocs/budgets/repository/budget_repository.dart';
+import 'package:budget_book_app/blocs/sync/sync_repository/sync_repository.dart';
 import 'package:budget_book_app/firebase_options.dart';
 import 'package:budget_book_app/themes/my_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,20 +42,6 @@ Future<void> overlayEntryPoint() async {
   channel.setMethodCallHandler((call) async {
     final box = Hive.box<BudgetItem>('itemsBox');
 
-    // if (call.method == "addItemFromOverlay") {
-    //   final data = Map<String, dynamic>.from(call.arguments);
-
-    //   box.add(BudgetItem(
-    //     id: DateTime.now().millisecondsSinceEpoch.toString(),
-    //     name: data["name"],
-    //     quantity: int.parse(data["quantity"]),
-    //     price: int.parse(data["price"]),
-    //     dateTime: DateTime.now(),
-    //     imagePath: "",
-    //   ));
-
-    //   return null;
-    // }
 
     // ======================================================
     // FIXED : ALWAYS SAVE USING item.id AS THE HIVE KEY
@@ -82,18 +69,6 @@ Future<void> overlayEntryPoint() async {
 
       return {"savedId": item.id};
     }
-
-    // if (call.method == "getSuggestions") {
-    //   return box.values
-    //       .map(
-    //         (item) => {
-    //           "name": item.name,
-    //           "quantity": item.quantity,
-    //           "price": item.price,
-    //         },
-    //       )
-    //       .toList();
-    // }
 
     if (call.method == "getSuggestions") {
       final latestByName = <String, Map<String, dynamic>>{};
@@ -160,81 +135,16 @@ Future<void> main() async {
   final savedTheme = Hive.box('appSettings').get('themeMode', defaultValue: 1);
   themeNotifier.value = ThemeMode.values[savedTheme];
 
-  // runApp(
-  //   BlocProvider(
-  //     create: (_) {
-  //       final box = Hive.box<BudgetItem>('itemsBox');
-  //       final settingsBox = Hive.box("appSettings");
-  //       final repository = BudgetRepository(box, settingsBox);
-  //       final bloc = BudgetBloc(repository);
-  //       bloc.add(LoadBudget());
-
-  //       // ✅ AUTO-REENABLE SYNC IF USER IS LOGGED IN
-  //       // if (FirebaseAuth.instance.currentUser != null) {
-  //       //   bloc.add(SignInToGoogle());
-  //       // }
-  //       // 🔥 STARTUP SYNC FIX (THIS WAS MISSING)
-  //       final user = FirebaseAuth.instance.currentUser;
-  //       if (user != null) {
-  //         repository.currentUserData().then((_) {
-  //           repository.startSync();
-  //         });
-  //       }
-
-  //       return bloc;
-  //     },
-  //     child: const MyApp(),
-  //   ),
-  // );
-
-//   runApp(
-//   MultiBlocProvider(
-//     providers: [
-//       BlocProvider(
-//         create: (_) {
-//           final box = Hive.box<BudgetItem>('itemsBox');
-//           final settingsBox = Hive.box("appSettings");
-
-//           final budgetRepository = BudgetRepository(box, settingsBox);
-//           final bloc = BudgetBloc(budgetRepository);
-
-//           final user = FirebaseAuth.instance.currentUser;
-//           if (user != null) {
-//             budgetRepository.currentUserData().then((_) {
-//               budgetRepository.startSync();
-//             });
-//           }
-
-//           return bloc;
-//         },
-//       ),
-
-//       BlocProvider(
-//         create: (_) {
-//           final box = Hive.box<BudgetItem>('itemsBox');
-//           final settingsBox = Hive.box("appSettings");
-
-//           return AuthBloc(
-//             authRepository: AuthRepository(),
-//             budgetRepository: BudgetRepository(box, settingsBox),
-//           );
-//         },
-//       ),
-//     ],
-//     child: const MyApp(),
-//   ),
-// );
-
 final box = Hive.box<BudgetItem>('itemsBox');
 final settingsBox = Hive.box("appSettings");
 
 final budgetRepository = BudgetRepository(box, settingsBox);
 final authRepository = AuthRepository();
+final syncRepository = SyncRepository(box);
 
 final user = FirebaseAuth.instance.currentUser;
 if (user != null) {
-  await budgetRepository.currentUserData();
-  await budgetRepository.startSync();
+    await syncRepository.initializeCloudSync();
 }
 
 runApp(
@@ -246,7 +156,7 @@ runApp(
       BlocProvider(
         create: (_) => AuthBloc(
           authRepository: authRepository,
-          budgetRepository: budgetRepository,
+          syncRepository: syncRepository,
         ),
       ),
     ],
