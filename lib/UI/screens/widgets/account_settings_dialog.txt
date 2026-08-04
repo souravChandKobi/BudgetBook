@@ -218,14 +218,14 @@ class AccountSettingsDialog {
                               //   Api.showAppSnack("Error: $e");
                               // }
 
-                              try {
-                                context.read<BudgetBloc>().add(
-                                  CloudSyncRequested(),
-                                );
-                                Api.showAppSnack("Data Synced");
-                              } catch (e) {
-                                Api.showAppSnack("Error: $e");
-                              }
+                              // try {
+                              //   context.read<BudgetBloc>().add(
+                              //     CloudSyncRequested(),
+                              //   );
+                              //   Api.showAppSnack("Data Synced");
+                              // } catch (e) {
+                              //   Api.showAppSnack("Error: $e");
+                              // }
 
                               // close AccountSettingsDialog AFTER confirm
                               log("Sync confirmed");

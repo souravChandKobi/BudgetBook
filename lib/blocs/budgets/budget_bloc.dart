@@ -179,26 +179,26 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       emit(ItemDetailsLoaded(result, currentMonthQty));
     });
 
-    on<SignInToGoogleRequested>((event, emit) async {
-      final userCred = await repository.signInWithGoogle();
-      if (userCred == null) return;
+    // on<SignInToGoogleRequested>((event, emit) async {
+    //   final userCred = await repository.signInWithGoogle();
+    //   if (userCred == null) return;
 
-      await repository.currentUserData();
-      await repository.initialSync();
-      await repository.syncLocalItemsToCloud();
+    //   await repository.currentUserData();
+    //   await repository.initialSync();
+    //   await repository.syncLocalItemsToCloud();
 
-      await repository.startSync();
-    });
+    //   await repository.startSync();
+    // });
 
-    on<SignOutRequested>((event, emit) async {
-      await repository.stopSync();
+    // on<SignOutRequested>((event, emit) async {
+    //   await repository.stopSync();
 
-      await FirebaseAuth.instance.signOut();
-      await GoogleSignIn.instance.signOut();
-      await GoogleSignIn.instance.disconnect();
+    //   await FirebaseAuth.instance.signOut();
+    //   await GoogleSignIn.instance.signOut();
+    //   await GoogleSignIn.instance.disconnect();
 
-      log("from budget_bloc.dart: 👋 User signed out safely");
-    });
+    //   log("from budget_bloc.dart: 👋 User signed out safely");
+    // });
 
     on<RenameBudgetItems>((event, emit) async {
       final items = repository.getAllItems();

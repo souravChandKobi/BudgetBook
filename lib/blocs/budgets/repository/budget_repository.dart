@@ -94,32 +94,32 @@ class BudgetRepository {
   }
 
   /// Google Signin
-  Future<UserCredential?> signInWithGoogle() async {
-    await GoogleSignIn.instance.initialize();
+  // Future<UserCredential?> signInWithGoogle() async {
+  //   await GoogleSignIn.instance.initialize();
 
-    try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-          .authenticate();
+  //   try {
+  //     // Trigger the authentication flow
+  //     final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+  //         .authenticate();
 
-      // if (googleUser == null) return null;
+  //     // if (googleUser == null) return null;
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+  //     // Obtain the auth details from the request
+  //     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
+  //     // Create a new credential
+  //     final credential = GoogleAuthProvider.credential(
+  //       idToken: googleAuth.idToken,
+  //     );
 
-      // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      log('\nCANCELLED LOGIN');
-      // Dialogs.showSnackbar(context, 'Something went wrong! Try again...');
-      return null;
-    }
-  }
+  //     // Once signed in, return the UserCredential
+  //     return await FirebaseAuth.instance.signInWithCredential(credential);
+  //   } catch (e) {
+  //     log('\nCANCELLED LOGIN');
+  //     // Dialogs.showSnackbar(context, 'Something went wrong! Try again...');
+  //     return null;
+  //   }
+  // }
 
   // ============================================================
   // SYNC LOGIC (YOUR ORIGINAL LOGIC)

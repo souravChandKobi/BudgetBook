@@ -8,13 +8,15 @@ import 'package:budget_book_app/UI/screens/itemDataScreen.dart';
 import 'package:budget_book_app/UI/screens/permissions_screen.dart';
 import 'package:budget_book_app/UI/screens/theme_select_screeen.dart';
 import 'package:budget_book_app/UI/screens/top_expenses_screen.dart';
-import 'package:budget_book_app/UI/screens/widgets/account_settings_dialog.dart';
+// import 'package:budget_book_app/UI/screens/widgets/account_settings_dialog.dart';
 import 'package:budget_book_app/UI/screens/widgets/add_item_dialog_box.dart';
 import 'package:budget_book_app/UI/screens/widgets/item_card.dart';
 import 'package:budget_book_app/UI/screens/widgets/month_card.dart';
 import 'package:budget_book_app/UI/screens/widgets/set_budget_dialog_box.dart';
 import 'package:budget_book_app/UI/screens/widgets/top_card1.dart';
 import 'package:budget_book_app/UI/screens/widgets/top_card2.dart';
+import 'package:budget_book_app/blocs/auth/auth_bloc.dart';
+import 'package:budget_book_app/blocs/auth/auth_event.dart';
 import 'package:budget_book_app/blocs/budgets/budget_bloc.dart';
 import 'package:budget_book_app/blocs/budgets/budget_event.dart';
 import 'package:budget_book_app/blocs/budgets/budget_state.dart';
@@ -179,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isRight = !isRight;
                                       });
                                       try {
-                                        context.read<BudgetBloc>().add(
+                                        context.read<AuthBloc>().add(
                                           SignInToGoogleRequested(),
                                         );
                                       } catch (e) {
@@ -638,7 +640,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       });
 
                                       try {
-                                        context.read<BudgetBloc>().add(
+                                        context.read<AuthBloc>().add(
                                           SignOutRequested(),
                                         );
                                         Api.showAppSnack("Logged out");
@@ -789,7 +791,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       });
 
                                       try {
-                                        context.read<BudgetBloc>().add(
+                                        context.read<AuthBloc>().add(
                                           SignInToGoogleRequested(),
                                         );
                                       } catch (e) {
@@ -1059,7 +1061,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                       // iconTheme: const IconThemeData(color: Colors.white70),
                       title: Text(
-                        "Budget Book",
+                        "Budget Test",
                         style: TextStyle(
                           color: myThemeVar.colorScheme.primary,
                           fontFamily: GoogleFonts.workSans().fontFamily,

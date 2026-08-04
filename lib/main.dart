@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:budget_book_app/UI/screens/homeScreen.dart';
 import 'package:budget_book_app/UI/screens/test.dart';
+import 'package:budget_book_app/blocs/auth/auth_bloc.dart';
+import 'package:budget_book_app/blocs/auth/auth_repository/auth_repository.dart';
 import 'package:budget_book_app/blocs/budgets/budget_bloc.dart';
 import 'package:budget_book_app/blocs/budgets/budget_event.dart';
 import 'package:budget_book_app/blocs/budgets/models/budget_item.dart';
@@ -116,7 +118,7 @@ Future<String> getExternalHivePath() async {
   // final dir = await getExternalStorageDirectory();
   // /storage/emulated/0/Android/data/<package>/files
   final hiveDir = Directory(
-    "/storage/emulated/0/Android/media/com.kobi.budget_book/hive",
+    "/storage/emulated/0/Android/media/com.kobi.budget_book_test_version/hive",
   );
 
   if (!hiveDir.existsSync()) {
@@ -158,32 +160,99 @@ Future<void> main() async {
   final savedTheme = Hive.box('appSettings').get('themeMode', defaultValue: 1);
   themeNotifier.value = ThemeMode.values[savedTheme];
 
-  runApp(
-    BlocProvider(
-      create: (_) {
-        final box = Hive.box<BudgetItem>('itemsBox');
-        final settingsBox = Hive.box("appSettings");
-        final repository = BudgetRepository(box, settingsBox);
-        final bloc = BudgetBloc(repository);
-        bloc.add(LoadBudget());
+  // runApp(
+  //   BlocProvider(
+  //     create: (_) {
+  //       final box = Hive.box<BudgetItem>('itemsBox');
+  //       final settingsBox = Hive.box("appSettings");
+  //       final repository = BudgetRepository(box, settingsBox);
+  //       final bloc = BudgetBloc(repository);
+  //       bloc.add(LoadBudget());
 
-        // ✅ AUTO-REENABLE SYNC IF USER IS LOGGED IN
-        // if (FirebaseAuth.instance.currentUser != null) {
-        //   bloc.add(SignInToGoogle());
-        // }
-        // 🔥 STARTUP SYNC FIX (THIS WAS MISSING)
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          repository.currentUserData().then((_) {
-            repository.startSync();
-          });
-        }
+  //       // ✅ AUTO-REENABLE SYNC IF USER IS LOGGED IN
+  //       // if (FirebaseAuth.instance.currentUser != null) {
+  //       //   bloc.add(SignInToGoogle());
+  //       // }
+  //       // 🔥 STARTUP SYNC FIX (THIS WAS MISSING)
+  //       final user = FirebaseAuth.instance.currentUser;
+  //       if (user != null) {
+  //         repository.currentUserData().then((_) {
+  //           repository.startSync();
+  //         });
+  //       }
 
-        return bloc;
-      },
-      child: const MyApp(),
-    ),
-  );
+  //       return bloc;
+  //     },
+  //     child: const MyApp(),
+  //   ),
+  // );
+
+//   runApp(
+//   MultiBlocProvider(
+//     providers: [
+//       BlocProvider(
+//         create: (_) {
+//           final box = Hive.box<BudgetItem>('itemsBox');
+//           final settingsBox = Hive.box("appSettings");
+
+//           final budgetRepository = BudgetRepository(box, settingsBox);
+//           final bloc = BudgetBloc(budgetRepository);
+
+//           final user = FirebaseAuth.instance.currentUser;
+//           if (user != null) {
+//             budgetRepository.currentUserData().then((_) {
+//               budgetRepository.startSync();
+//             });
+//           }
+
+//           return bloc;
+//         },
+//       ),
+
+//       BlocProvider(
+//         create: (_) {
+//           final box = Hive.box<BudgetItem>('itemsBox');
+//           final settingsBox = Hive.box("appSettings");
+
+//           return AuthBloc(
+//             authRepository: AuthRepository(),
+//             budgetRepository: BudgetRepository(box, settingsBox),
+//           );
+//         },
+//       ),
+//     ],
+//     child: const MyApp(),
+//   ),
+// );
+
+final box = Hive.box<BudgetItem>('itemsBox');
+final settingsBox = Hive.box("appSettings");
+
+final budgetRepository = BudgetRepository(box, settingsBox);
+final authRepository = AuthRepository();
+
+final user = FirebaseAuth.instance.currentUser;
+if (user != null) {
+  await budgetRepository.currentUserData();
+  await budgetRepository.startSync();
+}
+
+runApp(
+  MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (_) => BudgetBloc(budgetRepository),
+      ),
+      BlocProvider(
+        create: (_) => AuthBloc(
+          authRepository: authRepository,
+          budgetRepository: budgetRepository,
+        ),
+      ),
+    ],
+    child: const MyApp(),
+  ),
+);
 }
 
 class MyApp extends StatelessWidget {
